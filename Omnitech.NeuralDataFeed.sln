@@ -1,0 +1,73 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnitech.NeuralDataFeed.Worker", "Omnitech.NeuralDataFeed.Worker\Omnitech.NeuralDataFeed.Worker.csproj", "{ECCBAAC4-320A-4615-B7FB-914A7FAA13C5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnitech.NeuralDataFeed.Domain", "Omnitech.NeuralDataFeed.Domain\Omnitech.NeuralDataFeed.Domain.csproj", "{DE6BD7EC-4C07-4E5A-940E-61CE0F8767FB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnitech.NeuralDataFeed.Service", "Omnitech.NeuralDataFeed.Service\Omnitech.NeuralDataFeed.Service.csproj", "{C40A3C41-FDC5-4112-AB19-9E10F2C93434}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnitech.NeuralDataFeed.CrossCutting", "Omnitech.NeuralDataFeed.CrossCutting\Omnitech.NeuralDataFeed.CrossCutting.csproj", "{F514179E-089C-4BB2-BBD0-2EEA12E94012}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnitech.NeuralDataFeed.Data", "Omnitech.NeuralDataFeed.Data\Omnitech.NeuralDataFeed.Data.csproj", "{79B76672-FDD8-4F94-87DF-09BD39DAEEA7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1- Application", "1- Application", "{A5DB3A3C-AC96-4241-B81C-D9521E0518BC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 - Domain", "2 - Domain", "{4FA399B9-4537-4C70-A725-36B808AA2EE9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3 - Service", "3 - Service", "{03A45DA4-7CCD-4BB9-BACA-52F981A44D1F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4 - Infra", "4 - Infra", "{E3147453-5EB7-4550-B3D7-C252089CD156}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5 - Provider", "5 - Provider", "{3E9F8D5A-34E7-4A82-A947-C2DE1CB53FC5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnitech.NeuralDataFeed.Provider", "Omnitech.NeuralDataFeed.Provider\Omnitech.NeuralDataFeed.Provider.csproj", "{A339C90C-2260-4548-A476-21D2DAEB51D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ECCBAAC4-320A-4615-B7FB-914A7FAA13C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECCBAAC4-320A-4615-B7FB-914A7FAA13C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECCBAAC4-320A-4615-B7FB-914A7FAA13C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECCBAAC4-320A-4615-B7FB-914A7FAA13C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE6BD7EC-4C07-4E5A-940E-61CE0F8767FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE6BD7EC-4C07-4E5A-940E-61CE0F8767FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE6BD7EC-4C07-4E5A-940E-61CE0F8767FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE6BD7EC-4C07-4E5A-940E-61CE0F8767FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C40A3C41-FDC5-4112-AB19-9E10F2C93434}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C40A3C41-FDC5-4112-AB19-9E10F2C93434}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C40A3C41-FDC5-4112-AB19-9E10F2C93434}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C40A3C41-FDC5-4112-AB19-9E10F2C93434}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F514179E-089C-4BB2-BBD0-2EEA12E94012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F514179E-089C-4BB2-BBD0-2EEA12E94012}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F514179E-089C-4BB2-BBD0-2EEA12E94012}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F514179E-089C-4BB2-BBD0-2EEA12E94012}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79B76672-FDD8-4F94-87DF-09BD39DAEEA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79B76672-FDD8-4F94-87DF-09BD39DAEEA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79B76672-FDD8-4F94-87DF-09BD39DAEEA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79B76672-FDD8-4F94-87DF-09BD39DAEEA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A339C90C-2260-4548-A476-21D2DAEB51D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A339C90C-2260-4548-A476-21D2DAEB51D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A339C90C-2260-4548-A476-21D2DAEB51D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A339C90C-2260-4548-A476-21D2DAEB51D8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{ECCBAAC4-320A-4615-B7FB-914A7FAA13C5} = {A5DB3A3C-AC96-4241-B81C-D9521E0518BC}
+		{DE6BD7EC-4C07-4E5A-940E-61CE0F8767FB} = {4FA399B9-4537-4C70-A725-36B808AA2EE9}
+		{C40A3C41-FDC5-4112-AB19-9E10F2C93434} = {03A45DA4-7CCD-4BB9-BACA-52F981A44D1F}
+		{F514179E-089C-4BB2-BBD0-2EEA12E94012} = {E3147453-5EB7-4550-B3D7-C252089CD156}
+		{79B76672-FDD8-4F94-87DF-09BD39DAEEA7} = {E3147453-5EB7-4550-B3D7-C252089CD156}
+		{A339C90C-2260-4548-A476-21D2DAEB51D8} = {3E9F8D5A-34E7-4A82-A947-C2DE1CB53FC5}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5EB8AC66-2D28-4EFF-9A7F-DF43C2E606A7}
+	EndGlobalSection
+EndGlobal
