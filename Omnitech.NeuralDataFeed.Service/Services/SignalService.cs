@@ -66,7 +66,7 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                     var candlesticksToVerify = await _marketDataRepository.GetFirstNCandleWithoutBuySignal(tradingPair.Name, 100000);
 
                     double target = 0.016;
-                    double stop = 0.04;
+                    double stop = 0.004;
 
                     foreach (var candle in candlesticksToVerify)
                     {
