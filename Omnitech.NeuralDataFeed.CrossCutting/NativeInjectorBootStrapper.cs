@@ -2,9 +2,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Omnitech.NeuralDataFeed.Data;
 using Omnitech.NeuralDataFeed.Data.Interfaces;
 using Omnitech.NeuralDataFeed.Data.Repositories;
 using Omnitech.NeuralDataFeed.Domain.Configurations;
+using Omnitech.NeuralDataFeed.Domain.Entities;
 using Omnitech.NeuralDataFeed.Provider.Configurations;
 using Omnitech.NeuralDataFeed.Provider.Interfaces;
 using Omnitech.NeuralDataFeed.Provider.Providers;
@@ -22,6 +24,9 @@ namespace Omnitech.NeuralDataFeed.CrossCutting
             AddProviders(services);
             //AddDatabase(services);
             AddRepositories(services);
+
+            Dapper.SqlMapper.SetTypeMap(typeof(MarketData), new SnakeCaseToCamelCaseMapper(typeof(MarketData)));
+
         }
 
         private static void AddConfigurations(IServiceCollection services, IConfiguration configuration)
@@ -49,6 +54,8 @@ namespace Omnitech.NeuralDataFeed.CrossCutting
         {
             services.AddScoped<IMarketDataService, MarketDataService>();
             services.AddScoped<ISignalService, SignalService>();
+            services.AddScoped<IBinanceService, BinanceService>();
+
         }
 
         private static void AddRepositories(IServiceCollection services)

@@ -1,10 +1,7 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Omnitech.NeuralDataFeed.CrossCutting;
+using Omnitech.NeuralDataFeed.Data;
+using Omnitech.NeuralDataFeed.Domain.Entities;
 using Omnitech.NeuralDataFeed.Service.Interfaces;
-using Omnitech.NeuralDataFeed.Service.Services;
 using Serilog;
 using Serilog.Events;
 
@@ -15,6 +12,7 @@ namespace Omnitech.NeuralDataFeed.Worker
         static async Task Main(string[] args)
         {
             // Habilitar logging interno do Serilog para diagnóstico
+
             Serilog.Debugging.SelfLog.Enable(msg => Console.WriteLine(msg));
 
             // Construir a configuração
@@ -47,10 +45,6 @@ namespace Omnitech.NeuralDataFeed.Worker
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
                 )
                 .CreateLogger();
-
-
-            // Configurar serviços
-
 
             // Executar a tarefa principal
             try
@@ -85,7 +79,6 @@ namespace Omnitech.NeuralDataFeed.Worker
         {
             // Registrar serviços
             NativeInjectorBootStrapper.RegisterDependencies(services, configuration);
-
             // Configurar o logging para usar o Serilog
             services.AddLogging(loggingBuilder =>
             {
