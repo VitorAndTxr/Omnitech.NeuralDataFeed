@@ -3,8 +3,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Omnitech.NeuralDataFeed.Data.Repositories;
 using Omnitech.NeuralDataFeed.Domain.Configurations;
+using Omnitech.NeuralDataFeed.Domain.Entities;
 using Omnitech.NeuralDataFeed.Domain.Enumerators;
 using Omnitech.NeuralDataFeed.Domain.ExternalApi.Binance.Payloads;
+using Omnitech.NeuralDataFeed.Domain.Payloads;
 using Omnitech.NeuralDataFeed.Provider.Configurations;
 using Omnitech.NeuralDataFeed.Provider.Interfaces;
 using Omnitech.NeuralDataFeed.Service.Interfaces;
@@ -48,10 +50,6 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                     await UpdateTradingPairMarketData(tradingPair);
                 }
 
-                // Buscar pares de Moedas
-
-                //while()
-
                 _logger.LogInformation("Atualização dos dados de mercado concluída.");
                 await Task.CompletedTask;
                
@@ -60,6 +58,8 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                 _logger.LogError(ex, "Erro ao atualizar os dados de mercado.");
             }
         }
+
+
 
         public async Task UpdateTradingPairMarketData(TradingPairSettings tradingPair)
         {
@@ -85,6 +85,10 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                         StartTime = (lastCandleTimeStamp.AddMinutes(1) - new DateTime(1970, 1, 1)).TotalMilliseconds
                     });
 
+                    if(candlestickData.Count == 0)
+                    {
+                        break;
+                    }
 
                     await _marketDataRepository.InsertMarketDataListAsync(candlestickData);
 
@@ -102,6 +106,41 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                 _logger.LogInformation("Atualização dos dados de mercado concluída.");
                 
                 await Task.CompletedTask;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<MarketData>> GetMarketDataAsync(NeuralDataFeedRequestPayload payload)
+        {
+
+            try
+            {
+                // Lógica para atualizar os dados de mercado
+                _logger.LogInformation("Iniciando a busca dos dados de mercado...");
+
+                if(payload.StartDateTime == null&&payload.EndDateTime == null)
+                {
+                    throw new Exception("É necessário informar a data de início ou a data de fim.");
+                }
+
+                if (payload.StartDateTime == null)
+                {
+                    payload.EndDateTime = payload.EndDateTime!.Value.AddMinutes(1);
+                    payload.StartDateTime = payload.EndDateTime!.Value.AddMinutes(-payload.NumberOfCandles);
+                }
+
+                if (payload.EndDateTime == null)
+                {
+                    var startDateTime = payload.StartDateTime!.Value;
+                    payload.EndDateTime = startDateTime.AddMinutes(payload.NumberOfCandles);
+                }
+
+                var marketData = await _marketDataRepository.GetMarketDataAsync(payload.PairName, payload.StartDateTime!.Value, payload.EndDateTime!.Value);
+                
+                return marketData;
             }
             catch
             {

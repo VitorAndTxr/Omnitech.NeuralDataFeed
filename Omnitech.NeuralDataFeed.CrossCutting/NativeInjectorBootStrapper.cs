@@ -12,24 +12,36 @@ using Omnitech.NeuralDataFeed.Provider.Interfaces;
 using Omnitech.NeuralDataFeed.Provider.Providers;
 using Omnitech.NeuralDataFeed.Service.Interfaces;
 using Omnitech.NeuralDataFeed.Service.Services;
+using Omnitech.NeuralDataFeed.Service.Services.WebSockets;
 
 namespace Omnitech.NeuralDataFeed.CrossCutting
 {
     public class NativeInjectorBootStrapper
     {
-        public static void RegisterDependencies(IServiceCollection services, IConfiguration configuration)
+        public static void RegisterWorkerDependencies(IServiceCollection services, IConfiguration configuration)
         {
-            AddConfigurations(services, configuration);
+            AddProviders(services, configuration);
+            AddDatabase(services, configuration);
             AddServices(services);
-            AddProviders(services);
-            //AddDatabase(services);
             AddRepositories(services);
 
             Dapper.SqlMapper.SetTypeMap(typeof(MarketData), new SnakeCaseToCamelCaseMapper(typeof(MarketData)));
 
         }
 
-        private static void AddConfigurations(IServiceCollection services, IConfiguration configuration)
+        public static void RegisterHostDependencies(IServiceCollection services, IConfiguration configuration)
+        {
+            AddProviders(services, configuration);
+            AddDatabase(services, configuration);
+            AddServices(services);
+            AddRepositories(services);
+            AddWebSocket(services);
+
+            Dapper.SqlMapper.SetTypeMap(typeof(MarketData), new SnakeCaseToCamelCaseMapper(typeof(MarketData)));
+
+        }
+
+        private static void AddProviders(IServiceCollection services, IConfiguration configuration)
         {
             var tradingPairSettings = configuration.GetSection("TradingPairs");
 
@@ -40,14 +52,7 @@ namespace Omnitech.NeuralDataFeed.CrossCutting
 
             services.Configure<List<TradingPairSettings>>(tradingPairSettings);
 
-            var dataBaseSetting = configuration.GetSection("ConnectionStrings");
-
-            if (dataBaseSetting == null)
-            {
-                throw new System.Exception("ConnectionStrings section not found in appsettings.json");
-            }
-
-            services.Configure<DatabaseSettings>(dataBaseSetting);
+            services.AddScoped<ITradingPairProvider, TradingPairProvider>();
 
         }
         private static void AddServices(IServiceCollection services)
@@ -58,20 +63,30 @@ namespace Omnitech.NeuralDataFeed.CrossCutting
 
         }
 
+
+
         private static void AddRepositories(IServiceCollection services)
         {
             services.AddScoped<IMarketDataRepository, MarketDataRepository>();
         }
 
-        private static void AddDatabase(IServiceCollection services)
+        private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
         {
-            throw new NotImplementedException();
+            var dataBaseSetting = configuration.GetSection("ConnectionStrings");
+
+            if (dataBaseSetting == null)
+            {
+                throw new System.Exception("ConnectionStrings section not found in appsettings.json");
+            }
+
+            services.Configure<DatabaseSettings>(dataBaseSetting);
         }
 
-        private static void AddProviders(IServiceCollection services)
+        private static void AddWebSocket(IServiceCollection services)
         {
-            // Registrar o provedor de pares
-            services.AddSingleton<ITradingPairProvider, TradingPairProvider>();
+            services.AddSingleton<WebSocketHandler>();
+            services.AddSingleton<WebSocketConnectionManager>();
+
         }
     }
 }

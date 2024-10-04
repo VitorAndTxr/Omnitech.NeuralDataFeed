@@ -78,7 +78,7 @@ namespace Omnitech.NeuralDataFeed.Worker
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             // Registrar serviços
-            NativeInjectorBootStrapper.RegisterDependencies(services, configuration);
+            NativeInjectorBootStrapper.RegisterWorkerDependencies(services, configuration);
             // Configurar o logging para usar o Serilog
             services.AddLogging(loggingBuilder =>
             {
