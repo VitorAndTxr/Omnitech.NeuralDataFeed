@@ -1,6 +1,4 @@
 using Omnitech.NeuralDataFeed.CrossCutting;
-using Omnitech.NeuralDataFeed.Data;
-using Omnitech.NeuralDataFeed.Domain.Entities;
 using Omnitech.NeuralDataFeed.Service.Interfaces;
 using Serilog;
 using Serilog.Events;
@@ -11,11 +9,11 @@ namespace Omnitech.NeuralDataFeed.Worker
     {
         static async Task Main(string[] args)
         {
-            // Habilitar logging interno do Serilog para diagnóstico
+            // Habilitar logging interno do Serilog para diagnï¿½stico
 
             Serilog.Debugging.SelfLog.Enable(msg => Console.WriteLine(msg));
 
-            // Construir a configuração
+            // Construir a configuraï¿½ï¿½o
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -36,7 +34,7 @@ namespace Omnitech.NeuralDataFeed.Worker
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Information) // Ajusta o nível mínimo para logs do sistema
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information) // Ajusta o nï¿½vel mï¿½nimo para logs do sistema
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .WriteTo.File(
@@ -50,34 +48,34 @@ namespace Omnitech.NeuralDataFeed.Worker
             try
             {
                 var serviceCollection = new ServiceCollection();
-                Log.Warning("Iniciando aplicação");
+                Log.Warning("Iniciando aplicaï¿½ï¿½o");
                 ConfigureServices(serviceCollection, configuration);
 
-                // Construir provedor de serviços
+                // Construir provedor de serviï¿½os
                 var serviceProvider = serviceCollection.BuildServiceProvider();
 
                 var marketDataService = serviceProvider.GetRequiredService<IMarketDataService>();
-                var signalService = serviceProvider.GetRequiredService<ISignalService>();
 
+                // UpdateMarketDataAsync orchestrates ingestion, S/R detection, feature engineering,
+                // and labeling for all pairs internally â€” no additional signal service call needed.
                 await marketDataService.UpdateMarketDataAsync();
-                await signalService.UpdateBuySignalAsync();
 
-                Log.Information("Aplicação finalizada com sucesso.");
+                Log.Information("Aplicaï¿½ï¿½o finalizada com sucesso.");
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Um erro ocorreu durante a execução da aplicação.");
+                Log.Error(ex, "Um erro ocorreu durante a execuï¿½ï¿½o da aplicaï¿½ï¿½o.");
             }
             finally
             {
-                // Garantir que todos os logs sejam gravados antes de encerrar a aplicação
+                // Garantir que todos os logs sejam gravados antes de encerrar a aplicaï¿½ï¿½o
                 Log.CloseAndFlush();
             }
         }
 
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            // Registrar serviços
+            // Registrar serviï¿½os
             NativeInjectorBootStrapper.RegisterWorkerDependencies(services, configuration);
             // Configurar o logging para usar o Serilog
             services.AddLogging(loggingBuilder =>

@@ -1,7 +1,6 @@
-﻿
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Omnitech.NeuralDataFeed.Data;
 using Omnitech.NeuralDataFeed.Data.Interfaces;
 using Omnitech.NeuralDataFeed.Data.Repositories;
@@ -24,9 +23,7 @@ namespace Omnitech.NeuralDataFeed.CrossCutting
             AddDatabase(services, configuration);
             AddServices(services);
             AddRepositories(services);
-
-            Dapper.SqlMapper.SetTypeMap(typeof(MarketData), new SnakeCaseToCamelCaseMapper(typeof(MarketData)));
-
+            RegisterTypeMaps();
         }
 
         public static void RegisterHostDependencies(IServiceCollection services, IConfiguration configuration)
@@ -36,38 +33,43 @@ namespace Omnitech.NeuralDataFeed.CrossCutting
             AddServices(services);
             AddRepositories(services);
             AddWebSocket(services);
-
-            Dapper.SqlMapper.SetTypeMap(typeof(MarketData), new SnakeCaseToCamelCaseMapper(typeof(MarketData)));
-
+            RegisterTypeMaps();
         }
 
         private static void AddProviders(IServiceCollection services, IConfiguration configuration)
         {
             var tradingPairSettings = configuration.GetSection("TradingPairs");
 
-            if (tradingPairSettings== null)
-            {
-                throw new System.Exception("TradingPairs section not found in appsettings.json");
-            }
+            if (tradingPairSettings == null)
+                throw new Exception("TradingPairs section not found in appsettings.json");
 
             services.Configure<List<TradingPairSettings>>(tradingPairSettings);
+            services.Configure<LabelingSettings>(configuration.GetSection("LabelingSettings"));
 
             services.AddScoped<ITradingPairProvider, TradingPairProvider>();
-
+            services.AddScoped<ILabelingProvider, LabelingProvider>();
         }
+
         private static void AddServices(IServiceCollection services)
         {
+            services.AddHttpClient<IBinanceService, BinanceService>(client =>
+            {
+                client.BaseAddress = new Uri("https://api.binance.com/api/v3/");
+            });
+
             services.AddScoped<IMarketDataService, MarketDataService>();
             services.AddScoped<ISignalService, SignalService>();
-            services.AddScoped<IBinanceService, BinanceService>();
-
+            services.AddScoped<IFeatureEngineeringService, FeatureEngineeringService>();
+            services.AddScoped<ISupportResistanceService, SupportResistanceService>();
+            services.AddSingleton<IBinanceWebSocketService, BinanceWebSocketService>();
         }
-
-
 
         private static void AddRepositories(IServiceCollection services)
         {
             services.AddScoped<IMarketDataRepository, MarketDataRepository>();
+            services.AddScoped<IMarketDataTfRepository, MarketDataTfRepository>();
+            services.AddScoped<IMarketDataFeaturesRepository, MarketDataFeaturesRepository>();
+            services.AddScoped<ISupportResistanceLevelRepository, SupportResistanceLevelRepository>();
         }
 
         private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
@@ -75,9 +77,7 @@ namespace Omnitech.NeuralDataFeed.CrossCutting
             var dataBaseSetting = configuration.GetSection("ConnectionStrings");
 
             if (dataBaseSetting == null)
-            {
-                throw new System.Exception("ConnectionStrings section not found in appsettings.json");
-            }
+                throw new Exception("ConnectionStrings section not found in appsettings.json");
 
             services.Configure<DatabaseSettings>(dataBaseSetting);
         }
@@ -86,7 +86,14 @@ namespace Omnitech.NeuralDataFeed.CrossCutting
         {
             services.AddSingleton<WebSocketHandler>();
             services.AddSingleton<WebSocketConnectionManager>();
+        }
 
+        private static void RegisterTypeMaps()
+        {
+            Dapper.SqlMapper.SetTypeMap(typeof(MarketData),            new SnakeCaseToCamelCaseMapper(typeof(MarketData)));
+            Dapper.SqlMapper.SetTypeMap(typeof(MarketDataTf),          new SnakeCaseToCamelCaseMapper(typeof(MarketDataTf)));
+            Dapper.SqlMapper.SetTypeMap(typeof(MarketDataFeature),     new SnakeCaseToCamelCaseMapper(typeof(MarketDataFeature)));
+            Dapper.SqlMapper.SetTypeMap(typeof(SupportResistanceLevel),new SnakeCaseToCamelCaseMapper(typeof(SupportResistanceLevel)));
         }
     }
 }

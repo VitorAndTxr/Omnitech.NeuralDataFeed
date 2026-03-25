@@ -7,5 +7,6 @@ namespace Omnitech.NeuralDataFeed.Service.Interfaces
     {
         Task<DateTime?> GetServerTime();
         Task<List<MarketData>> GetCandlestickData(GetCandlestickDataPayload payload);
+        Task<List<MarketDataTf>> GetCandlestickDataTf(GetCandlestickDataPayload payload, string timeframe);
     }
 }

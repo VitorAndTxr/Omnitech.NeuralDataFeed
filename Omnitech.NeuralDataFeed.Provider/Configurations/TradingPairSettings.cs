@@ -10,5 +10,6 @@ namespace Omnitech.NeuralDataFeed.Domain.Configurations
     {
         public string Name { get; set; }
         public long FirstCandleUnixTimeMilliseconds { get; set; }
+        public List<string> Timeframes { get; set; } = new() { "5m", "15m", "1h" };
     }
 }

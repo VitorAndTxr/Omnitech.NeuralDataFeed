@@ -3,5 +3,6 @@
     public interface ISignalService
     {
         Task UpdateBuySignalAsync();
+        Task UpdateLabelsAsync(string pairName);
     }
 }
