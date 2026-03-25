@@ -117,7 +117,7 @@ namespace Omnitech.NeuralDataFeed.Service.Services
         {
             var interval = CandleStickInterval.FromCode(timeframe);
 
-            var startTime = DateTimeOffset.FromUnixTimeMilliseconds(tradingPair.FirstCandleUnixTimeMilliseconds).DateTime;
+            var startTime = DateTimeOffset.FromUnixTimeMilliseconds(tradingPair.FirstCandleUnixTimeMilliseconds).UtcDateTime;
             var lastCandle = await _marketDataTfRepository.GetMostRecentCandleAsync(tradingPair.Name, timeframe);
 
             if (lastCandle != null)
@@ -167,7 +167,7 @@ namespace Omnitech.NeuralDataFeed.Service.Services
             {
                 _logger.LogInformation("{Pair}: legacy 1m ingestion start", tradingPair.Name);
 
-                var lastCandleTimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(tradingPair.FirstCandleUnixTimeMilliseconds).DateTime;
+                var lastCandleTimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(tradingPair.FirstCandleUnixTimeMilliseconds).UtcDateTime;
                 var lastCandle = await _marketDataRepository.GetMostRecentCandleFromPairAsync(tradingPair.Name);
 
                 if (lastCandle != null)

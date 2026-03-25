@@ -141,8 +141,8 @@ namespace Omnitech.NeuralDataFeed.Service.Services
 
                 var symbol    = data.GetProperty("s").GetString()!;
                 var interval  = k.GetProperty("i").GetString()!;
-                var openTime  = DateTimeOffset.FromUnixTimeMilliseconds(k.GetProperty("t").GetInt64()).DateTime;
-                var closeTime = DateTimeOffset.FromUnixTimeMilliseconds(k.GetProperty("T").GetInt64()).DateTime;
+                var openTime  = DateTimeOffset.FromUnixTimeMilliseconds(k.GetProperty("t").GetInt64()).UtcDateTime;
+                var closeTime = DateTimeOffset.FromUnixTimeMilliseconds(k.GetProperty("T").GetInt64()).UtcDateTime;
 
                 var candle = new MarketDataTf
                 {

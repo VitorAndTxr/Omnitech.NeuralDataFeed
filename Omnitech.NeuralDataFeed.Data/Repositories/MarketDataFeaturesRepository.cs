@@ -51,11 +51,11 @@ namespace Omnitech.NeuralDataFeed.Data.Repositories
                     await writer.WriteAsync(f.PairName, NpgsqlDbType.Text);
                     await writer.WriteAsync(f.CandleOpenTime, NpgsqlDbType.TimestampTz);
                     await writer.WriteAsync(f.Timeframe, NpgsqlDbType.Text);
-                    await writer.WriteAsync(f.OpenPrice, NpgsqlDbType.Double);
-                    await writer.WriteAsync(f.HighPrice, NpgsqlDbType.Double);
-                    await writer.WriteAsync(f.LowPrice, NpgsqlDbType.Double);
-                    await writer.WriteAsync(f.ClosePrice, NpgsqlDbType.Double);
-                    await writer.WriteAsync(f.Volume, NpgsqlDbType.Double);
+                    await writer.WriteAsync((decimal)f.OpenPrice, NpgsqlDbType.Numeric);
+                    await writer.WriteAsync((decimal)f.HighPrice, NpgsqlDbType.Numeric);
+                    await writer.WriteAsync((decimal)f.LowPrice, NpgsqlDbType.Numeric);
+                    await writer.WriteAsync((decimal)f.ClosePrice, NpgsqlDbType.Numeric);
+                    await writer.WriteAsync((decimal)f.Volume, NpgsqlDbType.Numeric);
                     await WriteNullableDouble(writer, f.Rsi14);
                     await WriteNullableDouble(writer, f.Rsi7);
                     await WriteNullableDouble(writer, f.StochRsiK);
@@ -236,7 +236,7 @@ namespace Omnitech.NeuralDataFeed.Data.Repositories
         private static async Task WriteNullableDouble(NpgsqlBinaryImporter writer, double? value)
         {
             if (value.HasValue)
-                await writer.WriteAsync(value.Value, NpgsqlDbType.Double);
+                await writer.WriteAsync((decimal)value.Value, NpgsqlDbType.Numeric);
             else
                 await writer.WriteNullAsync();
         }

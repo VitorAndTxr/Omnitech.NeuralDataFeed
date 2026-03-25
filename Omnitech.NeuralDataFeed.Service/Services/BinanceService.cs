@@ -75,13 +75,13 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                         candlesticks.Add(new MarketData
                         {
                             PairName       = payload.Symbol,
-                            CandleOpenTime = DateTimeOffset.FromUnixTimeMilliseconds((long)candle[0]).DateTime,
+                            CandleOpenTime = DateTimeOffset.FromUnixTimeMilliseconds((long)candle[0]).UtcDateTime,
                             OpenPrice      = float.Parse((string)candle[1], CultureInfo.InvariantCulture),
                             HighPrice      = float.Parse((string)candle[2], CultureInfo.InvariantCulture),
                             LowPrice       = float.Parse((string)candle[3], CultureInfo.InvariantCulture),
                             ClosePrice     = float.Parse((string)candle[4], CultureInfo.InvariantCulture),
                             Volume         = float.Parse((string)candle[5], CultureInfo.InvariantCulture),
-                            CandleCloseTime = DateTimeOffset.FromUnixTimeMilliseconds((long)candle[6]).DateTime
+                            CandleCloseTime = DateTimeOffset.FromUnixTimeMilliseconds((long)candle[6]).UtcDateTime
                         });
                     });
 
@@ -119,13 +119,13 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                         {
                             PairName       = payload.Symbol,
                             Timeframe      = timeframe,
-                            CandleOpenTime = DateTimeOffset.FromUnixTimeMilliseconds((long)candle[0]).DateTime,
+                            CandleOpenTime = DateTimeOffset.FromUnixTimeMilliseconds((long)candle[0]).UtcDateTime,
                             OpenPrice      = float.Parse((string)candle[1], CultureInfo.InvariantCulture),
                             HighPrice      = float.Parse((string)candle[2], CultureInfo.InvariantCulture),
                             LowPrice       = float.Parse((string)candle[3], CultureInfo.InvariantCulture),
                             ClosePrice     = float.Parse((string)candle[4], CultureInfo.InvariantCulture),
                             Volume         = float.Parse((string)candle[5], CultureInfo.InvariantCulture),
-                            CandleCloseTime = DateTimeOffset.FromUnixTimeMilliseconds((long)candle[6]).DateTime
+                            CandleCloseTime = DateTimeOffset.FromUnixTimeMilliseconds((long)candle[6]).UtcDateTime
                         });
                     });
 

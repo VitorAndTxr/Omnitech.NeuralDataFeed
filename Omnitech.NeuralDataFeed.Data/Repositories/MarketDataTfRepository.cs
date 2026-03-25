@@ -30,11 +30,11 @@ namespace Omnitech.NeuralDataFeed.Data.Repositories
                 await writer.WriteAsync(c.PairName, NpgsqlDbType.Text);
                 await writer.WriteAsync(c.CandleOpenTime, NpgsqlDbType.TimestampTz);
                 await writer.WriteAsync(c.Timeframe, NpgsqlDbType.Text);
-                await writer.WriteAsync(c.OpenPrice, NpgsqlDbType.Double);
-                await writer.WriteAsync(c.HighPrice, NpgsqlDbType.Double);
-                await writer.WriteAsync(c.LowPrice, NpgsqlDbType.Double);
-                await writer.WriteAsync(c.ClosePrice, NpgsqlDbType.Double);
-                await writer.WriteAsync(c.Volume, NpgsqlDbType.Double);
+                await writer.WriteAsync((decimal)c.OpenPrice, NpgsqlDbType.Numeric);
+                await writer.WriteAsync((decimal)c.HighPrice, NpgsqlDbType.Numeric);
+                await writer.WriteAsync((decimal)c.LowPrice, NpgsqlDbType.Numeric);
+                await writer.WriteAsync((decimal)c.ClosePrice, NpgsqlDbType.Numeric);
+                await writer.WriteAsync((decimal)c.Volume, NpgsqlDbType.Numeric);
                 await writer.WriteAsync(c.CandleCloseTime, NpgsqlDbType.TimestampTz);
             }
 
