@@ -235,6 +235,21 @@ namespace Omnitech.NeuralDataFeed.Data.Repositories
             return result.ToList();
         }
 
+        public async Task<List<MarketDataFeature>> GetLabeledAfterAsync(string pairName, string timeframe, DateTime afterTime, int count)
+        {
+            const string sql = @"
+                SELECT * FROM market_data_features
+                WHERE pair_name = @PairName AND timeframe = @Timeframe
+                  AND candle_open_time > @AfterTime
+                ORDER BY candle_open_time ASC
+                LIMIT @Count";
+
+            using var connection = new NpgsqlConnection(_connectionString);
+            var result = await connection.QueryAsync<MarketDataFeature>(sql,
+                new { PairName = pairName, Timeframe = timeframe, AfterTime = afterTime, Count = count });
+            return result.ToList();
+        }
+
         private static async Task WriteNullableDouble(NpgsqlBinaryImporter writer, double? value)
         {
             if (value.HasValue)

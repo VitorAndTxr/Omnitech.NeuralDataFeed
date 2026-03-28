@@ -8,5 +8,7 @@ namespace Omnitech.NeuralDataFeed.Data.Repositories
         Task<List<MarketDataFeature>> GetUnlabeledAsync(string pairName, string timeframe, int batchSize);
         Task UpdateLabelsAsync(IEnumerable<MarketDataFeature> features);
         Task<List<MarketDataFeature>> GetFeaturesAsync(string pairName, string timeframe, DateTime from, DateTime to);
+        Task<List<MarketDataFeature>> GetLabeledAfterAsync(string pairName, string timeframe, DateTime afterTime, int count);
     }
 }
+        

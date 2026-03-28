@@ -6,6 +6,7 @@ namespace Omnitech.NeuralDataFeed.Data.Repositories
     {
         Task UpsertLevelsAsync(IEnumerable<SupportResistanceLevel> levels);
         Task<List<SupportResistanceLevel>> GetActiveLevelsAsync(string pairName);
-        Task DeactivateStaleAsync(string pairName, DateTime cutoffTime);
+        Task<List<SupportResistanceLevel>> GetAllLevelsAsync(string pairName);
+        Task DeactivateStaleAsync(string pairName, DateTime cutoff);
     }
 }

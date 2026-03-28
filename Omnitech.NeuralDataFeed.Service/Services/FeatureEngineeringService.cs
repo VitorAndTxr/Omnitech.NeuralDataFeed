@@ -9,7 +9,7 @@ namespace Omnitech.NeuralDataFeed.Service.Services
     public class FeatureEngineeringService : IFeatureEngineeringService
     {
         private const int BatchSize = 50_000;
-        private const int WarmupLookback = 200;
+        private const int WarmupLookback = 400;
 
         private readonly ILogger<FeatureEngineeringService> _logger;
         private readonly IMarketDataTfRepository _marketDataTfRepository;
@@ -34,38 +34,29 @@ namespace Omnitech.NeuralDataFeed.Service.Services
             {
                 _logger.LogInformation("{Pair}/{Tf}: starting feature engineering", pairName, timeframe);
 
-                var srLevels = await _srRepository.GetActiveLevelsAsync(pairName);
+                // Load all historical S/R levels (not just active) to avoid look-ahead bias
+                var srLevels = await _srRepository.GetAllLevelsAsync(pairName);
                 var supports = srLevels.Where(l => l.LevelType == "support").ToList();
                 var resistances = srLevels.Where(l => l.LevelType == "resistance").ToList();
 
-                // Process in time-ordered batches
-                DateTime? batchStart = null;
-                int totalProcessed = 0;
+                // Start from the earliest available candle and process forward
+                var allCandles = await _marketDataTfRepository.GetCandlesAsync(
+                    pairName, timeframe, DateTime.MinValue, DateTime.MaxValue);
 
-                while (true)
+                if (allCandles.Count <= WarmupLookback)
                 {
-                    // Fetch candles: warmup + batch
-                    List<MarketDataTf> candles;
-                    if (batchStart == null)
-                    {
-                        candles = await _marketDataTfRepository.GetLastNCandlesAsync(pairName, timeframe, WarmupLookback + BatchSize);
-                        if (candles.Count <= WarmupLookback) break;
-                    }
-                    else
-                    {
-                        // Get warmup candles before batchStart
-                        var warmup = await _marketDataTfRepository.GetCandlesAsync(
-                            pairName, timeframe,
-                            DateTime.MinValue, batchStart.Value.AddMilliseconds(-1));
-                        var lastWarmup = warmup.TakeLast(WarmupLookback).ToList();
+                    _logger.LogWarning("{Pair}/{Tf}: not enough candles ({Count}) for warmup ({Warmup})",
+                        pairName, timeframe, allCandles.Count, WarmupLookback);
+                    return;
+                }
 
-                        var batchEnd = batchStart.Value.AddDays(365);
-                        var batch = await _marketDataTfRepository.GetCandlesAsync(
-                            pairName, timeframe, batchStart.Value, batchEnd);
+                int totalProcessed = 0;
+                int offset = WarmupLookback;
 
-                        if (!batch.Any()) break;
-                        candles = lastWarmup.Concat(batch.Take(BatchSize)).ToList();
-                    }
+                while (offset < allCandles.Count)
+                {
+                    int end = Math.Min(offset + BatchSize, allCandles.Count);
+                    var candles = allCandles.GetRange(offset - WarmupLookback, end - (offset - WarmupLookback));
 
                     var quotes = candles.Select(c => (IQuote)new Quote
                     {
@@ -91,21 +82,21 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                     var bb          = quotes.GetBollingerBands(20, 2).ToList();
                     var atr         = quotes.GetAtr(14).ToList();
                     var obv         = quotes.GetObv().ToList();
-                    var vwap        = quotes.GetVwap().ToList();
-                    var volSma      = quotes.GetSma(20).ToList();
+                    // VWMA(20) replaces GetVwap() — fixed rolling window avoids accumulation-state leakage between batches
+                    var vwma        = quotes.GetVwma(20).ToList();
+                    // FIX-1: use Volume series explicitly; GetSma(20) defaults to Close
+                    var volSma      = quotes.Use(CandlePart.Volume).GetSma(20).ToList();
 
                     // CMF (20)
                     var cmf         = quotes.GetCmf(20).ToList();
 
-                    // Determine which candles belong to the non-warmup batch
-                    int startIdx = batchStart == null ? WarmupLookback : WarmupLookback;
-                    var targetCandles = candles.Skip(startIdx).ToList();
+                    var targetCandles = candles.Skip(WarmupLookback).ToList();
 
                     var features = new List<MarketDataFeature>(targetCandles.Count);
 
                     for (int i = 0; i < targetCandles.Count; i++)
                     {
-                        int qi = i + startIdx; // index in full quotes list
+                        int qi = i + WarmupLookback; // index in full quotes list
                         var candle = targetCandles[i];
 
                         double? prevMacdHist = qi > 0 ? (double?)macd[qi - 1].Histogram : null;
@@ -140,7 +131,7 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                             BbPctb        = (double?)bb[qi].PercentB,
                             Atr14         = (double?)atr[qi].Atr,
                             Obv           = (double?)obv[qi].Obv,
-                            Vwap          = (double?)vwap[qi].Vwap,
+                            Vwap          = (double?)vwma[qi].Vwma,
                             VolumeSma20   = (double?)volSma[qi].Sma,
                             Cmf20         = (double?)cmf[qi].Cmf,
                             PriceEma9Ratio  = ema9[qi].Ema.HasValue  ? candle.ClosePrice / (double)ema9[qi].Ema!.Value : null,
@@ -148,7 +139,7 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                             MacdHistSlope   = (curMacdHist.HasValue && prevMacdHist.HasValue) ? curMacdHist - prevMacdHist : null
                         };
 
-                        ApplySupportResistanceFeatures(feature, supports, resistances);
+                        ApplySupportResistanceFeatures(feature, supports, resistances, candle.CandleOpenTime);
                         features.Add(feature);
                     }
 
@@ -157,10 +148,7 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                     _logger.LogInformation("{Pair}/{Tf}: upserted {Count} feature rows (total {Total})",
                         pairName, timeframe, features.Count, totalProcessed);
 
-                    // If we got fewer than BatchSize new candles, we're done
-                    if (targetCandles.Count < BatchSize) break;
-
-                    batchStart = targetCandles.Last().CandleOpenTime.AddMilliseconds(1);
+                    offset = end;
                 }
 
                 _logger.LogInformation("{Pair}/{Tf}: feature engineering complete, {Total} rows", pairName, timeframe, totalProcessed);
@@ -175,12 +163,17 @@ namespace Omnitech.NeuralDataFeed.Service.Services
         private static void ApplySupportResistanceFeatures(
             MarketDataFeature feature,
             List<SupportResistanceLevel> supports,
-            List<SupportResistanceLevel> resistances)
+            List<SupportResistanceLevel> resistances,
+            DateTime candleTime)
         {
             double close = feature.ClosePrice;
 
-            var nearestSupport    = supports.Where(s => s.PriceLevel <= close).OrderByDescending(s => s.PriceLevel).FirstOrDefault();
-            var nearestResistance = resistances.Where(r => r.PriceLevel >= close).OrderBy(r => r.PriceLevel).FirstOrDefault();
+            // Only use levels detected before this candle's timestamp to prevent look-ahead bias
+            var validSupports    = supports.Where(s => s.FirstDetectedAt < candleTime).ToList();
+            var validResistances = resistances.Where(r => r.FirstDetectedAt < candleTime).ToList();
+
+            var nearestSupport    = validSupports.Where(s => s.PriceLevel <= close).OrderByDescending(s => s.PriceLevel).FirstOrDefault();
+            var nearestResistance = validResistances.Where(r => r.PriceLevel >= close).OrderBy(r => r.PriceLevel).FirstOrDefault();
 
             feature.NearestSupport    = nearestSupport?.PriceLevel;
             feature.NearestResistance = nearestResistance?.PriceLevel;
@@ -199,7 +192,8 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                 feature.SrZonePosition = denom > 0 ? feature.DistSupportPct.Value / denom : null;
             }
 
-            var allLevels = supports.Concat(resistances);
+            // Use only time-filtered levels to maintain look-ahead bias prevention
+            var allLevels = validSupports.Concat(validResistances);
             feature.NumSrWithin1Pct = allLevels.Count(l => Math.Abs(l.PriceLevel - close) / close * 100.0 <= 1.0);
         }
     }

@@ -27,7 +27,8 @@ public class SignalServiceTests
         string pairName = "BTCUSDT",
         string timeframe = "5m",
         double targetPct = 1.6,
-        double stopPct = 0.4)
+        double stopPct = 0.4,
+        List<MarketDataFeature>? futureContext = null)
     {
         var featRepo = new Mock<IMarketDataFeaturesRepository>();
         // Return unlabeled on first call, empty on second to stop the loop
@@ -36,6 +37,8 @@ public class SignalServiceTests
             .ReturnsAsync(new List<MarketDataFeature>());
         featRepo.Setup(r => r.UpdateLabelsAsync(It.IsAny<IEnumerable<MarketDataFeature>>()))
             .Returns(Task.CompletedTask);
+        featRepo.Setup(r => r.GetLabeledAfterAsync(pairName, timeframe, It.IsAny<DateTime>(), It.IsAny<int>()))
+            .ReturnsAsync(futureContext ?? new List<MarketDataFeature>());
 
         var pairProvider = new Mock<ITradingPairProvider>();
         pairProvider.Setup(p => p.GetTradingPairs()).Returns(new List<TradingPairSettings>
@@ -145,8 +148,7 @@ public class SignalServiceTests
             NullLogger<SignalService>.Instance,
             featRepo.Object, pairProvider.Object, labelingProvider.Object);
 
-        // Should not throw, and should not call repository
-        await service.UpdateLabelsAsync("UNKNOWN");
+        await service.UpdateLabelsAsync("UNKNOWN_PAIR");
 
         featRepo.Verify(r => r.GetUnlabeledAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.Never);
     }

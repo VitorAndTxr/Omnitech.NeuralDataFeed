@@ -80,17 +80,29 @@ namespace Omnitech.NeuralDataFeed.Data.Repositories
             return result.ToList();
         }
 
-        public async Task DeactivateStaleAsync(string pairName, DateTime cutoffTime)
+        public async Task<List<SupportResistanceLevel>> GetAllLevelsAsync(string pairName)
+        {
+            const string sql = @"
+                SELECT * FROM support_resistance_levels
+                WHERE pair_name = @PairName
+                ORDER BY price_level ASC";
+
+            using var connection = new NpgsqlConnection(_connectionString);
+            var result = await connection.QueryAsync<SupportResistanceLevel>(sql, new { PairName = pairName });
+            return result.ToList();
+        }
+
+        public async Task DeactivateStaleAsync(string pairName, DateTime cutoff)
         {
             const string sql = @"
                 UPDATE support_resistance_levels
                 SET is_active = FALSE
                 WHERE pair_name = @PairName
-                  AND last_tested_at < @CutoffTime
-                  AND is_active = TRUE";
+                  AND is_active = TRUE
+                  AND last_tested_at < @Cutoff";
 
             using var connection = new NpgsqlConnection(_connectionString);
-            await connection.ExecuteAsync(sql, new { PairName = pairName, CutoffTime = cutoffTime });
+            await connection.ExecuteAsync(sql, new { PairName = pairName, Cutoff = cutoff });
         }
     }
 }

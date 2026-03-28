@@ -62,7 +62,12 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                 var unlabeled = await _featuresRepository.GetUnlabeledAsync(pairName, timeframe, LabelBatchSize);
                 if (unlabeled.Count == 0) break;
 
-                // Sliding window: for each candle, scan forward until target or stop hit
+                // Fetch already-labeled candles after the batch end to provide forward-scan context for boundary candles
+                var futureContext = await _featuresRepository.GetLabeledAfterAsync(
+                    pairName, timeframe, unlabeled[^1].CandleOpenTime, 500);
+                var workingSet = unlabeled.Concat(futureContext).ToList();
+
+                // Sliding window: for each candle in unlabeled, scan forward in workingSet until target or stop hit
                 for (int i = 0; i < unlabeled.Count; i++)
                 {
                     var candle = unlabeled[i];
@@ -75,9 +80,9 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                     double? targetPct   = null;
                     double? drawdownPct = null;
 
-                    for (int j = i + 1; j < unlabeled.Count; j++)
+                    for (int j = i + 1; j < workingSet.Count; j++)
                     {
-                        var future = unlabeled[j];
+                        var future = workingSet[j];
 
                         maxReached = Math.Max(maxReached, future.HighPrice);
                         minReached = Math.Min(minReached, future.LowPrice);
@@ -129,8 +134,13 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                 _logger.LogInformation("{Pair}/{Tf}: labeled {Count} rows (total {Total})",
                     pairName, timeframe, labeled.Count, processed);
 
-                // If no new labels were assigned, stop to avoid infinite loop
-                if (labeled.Count == 0) break;
+                // If no labels were assigned even with future context, there is genuinely insufficient future data
+                if (labeled.Count == 0)
+                {
+                    _logger.LogWarning("{Pair}/{Tf}: {Count} candles remain unlabeled (insufficient future data)",
+                        pairName, timeframe, unlabeled.Count);
+                    break;
+                }
             }
         }
 
