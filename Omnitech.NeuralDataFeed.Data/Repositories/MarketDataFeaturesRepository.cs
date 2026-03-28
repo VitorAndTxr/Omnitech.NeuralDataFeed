@@ -29,7 +29,7 @@ namespace Omnitech.NeuralDataFeed.Data.Repositories
                     SELECT * FROM market_data_features LIMIT 0;";
                 await connection.ExecuteAsync(createTemp, transaction: transaction);
 
-                using var writer = connection.BeginBinaryImport(@"
+                using (var writer = connection.BeginBinaryImport(@"
                     COPY temp_features (
                         pair_name, candle_open_time, timeframe,
                         open_price, high_price, low_price, close_price, volume,
@@ -43,55 +43,56 @@ namespace Omnitech.NeuralDataFeed.Data.Repositories
                         dist_support_pct, dist_resistance_pct,
                         support_strength, resistance_strength,
                         sr_zone_position, num_sr_within_1pct
-                    ) FROM STDIN (FORMAT BINARY)");
-
-                foreach (var f in features)
+                    ) FROM STDIN (FORMAT BINARY)"))
                 {
-                    await writer.StartRowAsync();
-                    await writer.WriteAsync(f.PairName, NpgsqlDbType.Text);
-                    await writer.WriteAsync(f.CandleOpenTime, NpgsqlDbType.TimestampTz);
-                    await writer.WriteAsync(f.Timeframe, NpgsqlDbType.Text);
-                    await writer.WriteAsync((decimal)f.OpenPrice, NpgsqlDbType.Numeric);
-                    await writer.WriteAsync((decimal)f.HighPrice, NpgsqlDbType.Numeric);
-                    await writer.WriteAsync((decimal)f.LowPrice, NpgsqlDbType.Numeric);
-                    await writer.WriteAsync((decimal)f.ClosePrice, NpgsqlDbType.Numeric);
-                    await writer.WriteAsync((decimal)f.Volume, NpgsqlDbType.Numeric);
-                    await WriteNullableDouble(writer, f.Rsi14);
-                    await WriteNullableDouble(writer, f.Rsi7);
-                    await WriteNullableDouble(writer, f.StochRsiK);
-                    await WriteNullableDouble(writer, f.StochRsiD);
-                    await WriteNullableDouble(writer, f.Roc14);
-                    await WriteNullableDouble(writer, f.Ema9);
-                    await WriteNullableDouble(writer, f.Ema21);
-                    await WriteNullableDouble(writer, f.Ema50);
-                    await WriteNullableDouble(writer, f.Ema200);
-                    await WriteNullableDouble(writer, f.MacdLine);
-                    await WriteNullableDouble(writer, f.MacdSignal);
-                    await WriteNullableDouble(writer, f.MacdHistogram);
-                    await WriteNullableDouble(writer, f.Adx14);
-                    await WriteNullableDouble(writer, f.BbUpper);
-                    await WriteNullableDouble(writer, f.BbMiddle);
-                    await WriteNullableDouble(writer, f.BbLower);
-                    await WriteNullableDouble(writer, f.BbPctb);
-                    await WriteNullableDouble(writer, f.Atr14);
-                    await WriteNullableDouble(writer, f.Obv);
-                    await WriteNullableDouble(writer, f.Vwap);
-                    await WriteNullableDouble(writer, f.VolumeSma20);
-                    await WriteNullableDouble(writer, f.Cmf20);
-                    await WriteNullableDouble(writer, f.PriceEma9Ratio);
-                    await WriteNullableDouble(writer, f.PriceEma21Ratio);
-                    await WriteNullableDouble(writer, f.MacdHistSlope);
-                    await WriteNullableDouble(writer, f.NearestSupport);
-                    await WriteNullableDouble(writer, f.NearestResistance);
-                    await WriteNullableDouble(writer, f.DistSupportPct);
-                    await WriteNullableDouble(writer, f.DistResistancePct);
-                    await WriteNullableInt(writer, f.SupportStrength);
-                    await WriteNullableInt(writer, f.ResistanceStrength);
-                    await WriteNullableDouble(writer, f.SrZonePosition);
-                    await WriteNullableInt(writer, f.NumSrWithin1Pct);
-                }
+                    foreach (var f in features)
+                    {
+                        await writer.StartRowAsync();
+                        await writer.WriteAsync(f.PairName, NpgsqlDbType.Text);
+                        await writer.WriteAsync(f.CandleOpenTime, NpgsqlDbType.TimestampTz);
+                        await writer.WriteAsync(f.Timeframe, NpgsqlDbType.Text);
+                        await writer.WriteAsync((decimal)f.OpenPrice, NpgsqlDbType.Numeric);
+                        await writer.WriteAsync((decimal)f.HighPrice, NpgsqlDbType.Numeric);
+                        await writer.WriteAsync((decimal)f.LowPrice, NpgsqlDbType.Numeric);
+                        await writer.WriteAsync((decimal)f.ClosePrice, NpgsqlDbType.Numeric);
+                        await writer.WriteAsync((decimal)f.Volume, NpgsqlDbType.Numeric);
+                        await WriteNullableDouble(writer, f.Rsi14);
+                        await WriteNullableDouble(writer, f.Rsi7);
+                        await WriteNullableDouble(writer, f.StochRsiK);
+                        await WriteNullableDouble(writer, f.StochRsiD);
+                        await WriteNullableDouble(writer, f.Roc14);
+                        await WriteNullableDouble(writer, f.Ema9);
+                        await WriteNullableDouble(writer, f.Ema21);
+                        await WriteNullableDouble(writer, f.Ema50);
+                        await WriteNullableDouble(writer, f.Ema200);
+                        await WriteNullableDouble(writer, f.MacdLine);
+                        await WriteNullableDouble(writer, f.MacdSignal);
+                        await WriteNullableDouble(writer, f.MacdHistogram);
+                        await WriteNullableDouble(writer, f.Adx14);
+                        await WriteNullableDouble(writer, f.BbUpper);
+                        await WriteNullableDouble(writer, f.BbMiddle);
+                        await WriteNullableDouble(writer, f.BbLower);
+                        await WriteNullableDouble(writer, f.BbPctb);
+                        await WriteNullableDouble(writer, f.Atr14);
+                        await WriteNullableDouble(writer, f.Obv);
+                        await WriteNullableDouble(writer, f.Vwap);
+                        await WriteNullableDouble(writer, f.VolumeSma20);
+                        await WriteNullableDouble(writer, f.Cmf20);
+                        await WriteNullableDouble(writer, f.PriceEma9Ratio);
+                        await WriteNullableDouble(writer, f.PriceEma21Ratio);
+                        await WriteNullableDouble(writer, f.MacdHistSlope);
+                        await WriteNullableDouble(writer, f.NearestSupport);
+                        await WriteNullableDouble(writer, f.NearestResistance);
+                        await WriteNullableDouble(writer, f.DistSupportPct);
+                        await WriteNullableDouble(writer, f.DistResistancePct);
+                        await WriteNullableInt(writer, f.SupportStrength);
+                        await WriteNullableInt(writer, f.ResistanceStrength);
+                        await WriteNullableDouble(writer, f.SrZonePosition);
+                        await WriteNullableInt(writer, f.NumSrWithin1Pct);
+                    }
 
-                await writer.CompleteAsync();
+                    await writer.CompleteAsync();
+                }
 
                 const string upsert = @"
                     INSERT INTO market_data_features
@@ -177,26 +178,27 @@ namespace Omnitech.NeuralDataFeed.Data.Repositories
                         timeframe TEXT,
                         buy_signal BOOLEAN,
                         sell_signal BOOLEAN,
-                        target_pct DOUBLE PRECISION,
-                        drawdown_pct DOUBLE PRECISION
+                        target_pct NUMERIC,
+                        drawdown_pct NUMERIC
                     ) ON COMMIT DROP;";
                 await connection.ExecuteAsync(createTemp, transaction: transaction);
 
-                using var writer = connection.BeginBinaryImport(
-                    "COPY temp_labels (pair_name, candle_open_time, timeframe, buy_signal, sell_signal, target_pct, drawdown_pct) FROM STDIN (FORMAT BINARY)");
-
-                foreach (var f in features)
+                using (var writer = connection.BeginBinaryImport(
+                    "COPY temp_labels (pair_name, candle_open_time, timeframe, buy_signal, sell_signal, target_pct, drawdown_pct) FROM STDIN (FORMAT BINARY)"))
                 {
-                    await writer.StartRowAsync();
-                    await writer.WriteAsync(f.PairName, NpgsqlDbType.Text);
-                    await writer.WriteAsync(f.CandleOpenTime, NpgsqlDbType.TimestampTz);
-                    await writer.WriteAsync(f.Timeframe, NpgsqlDbType.Text);
-                    await WriteNullableBool(writer, f.BuySignal);
-                    await WriteNullableBool(writer, f.SellSignal);
-                    await WriteNullableDouble(writer, f.TargetPct);
-                    await WriteNullableDouble(writer, f.DrawdownPct);
+                    foreach (var f in features)
+                    {
+                        await writer.StartRowAsync();
+                        await writer.WriteAsync(f.PairName, NpgsqlDbType.Text);
+                        await writer.WriteAsync(f.CandleOpenTime, NpgsqlDbType.TimestampTz);
+                        await writer.WriteAsync(f.Timeframe, NpgsqlDbType.Text);
+                        await WriteNullableBool(writer, f.BuySignal);
+                        await WriteNullableBool(writer, f.SellSignal);
+                        await WriteNullableDouble(writer, f.TargetPct);
+                        await WriteNullableDouble(writer, f.DrawdownPct);
+                    }
+                    await writer.CompleteAsync();
                 }
-                await writer.CompleteAsync();
 
                 const string update = @"
                     UPDATE market_data_features mdf
