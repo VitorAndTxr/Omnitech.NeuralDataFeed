@@ -10,6 +10,7 @@ namespace Omnitech.NeuralDataFeed.Domain.Configurations
     {
         public double TargetPercent { get; set; } = 1.6;
         public double StopPercent { get; set; } = 0.4;
+        public int MaxLookaheadCandles { get; set; } = 0;
     }
 
     public class LabelingOverride
@@ -18,5 +19,6 @@ namespace Omnitech.NeuralDataFeed.Domain.Configurations
         public string Timeframe { get; set; }
         public double TargetPercent { get; set; }
         public double StopPercent { get; set; }
+        public int MaxLookaheadCandles { get; set; } = 0;
     }
 }

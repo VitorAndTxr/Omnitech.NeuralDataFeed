@@ -23,7 +23,8 @@ namespace Omnitech.NeuralDataFeed.Provider.Providers
                 return new LabelingThreshold
                 {
                     TargetPercent = overrideEntry.TargetPercent,
-                    StopPercent   = overrideEntry.StopPercent
+                    StopPercent   = overrideEntry.StopPercent,
+                    MaxLookaheadCandles = overrideEntry.MaxLookaheadCandles
                 };
 
             return _settings.Default;

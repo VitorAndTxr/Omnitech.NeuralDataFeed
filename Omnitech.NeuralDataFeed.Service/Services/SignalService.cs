@@ -54,6 +54,7 @@ namespace Omnitech.NeuralDataFeed.Service.Services
             var threshold = _labelingProvider.GetThreshold(pairName, timeframe);
             double target = threshold.TargetPercent / 100.0;
             double stop   = threshold.StopPercent / 100.0;
+            int maxLookahead = threshold.MaxLookaheadCandles;
 
             int processed = 0;
 
@@ -80,7 +81,11 @@ namespace Omnitech.NeuralDataFeed.Service.Services
                     double? targetPct   = null;
                     double? drawdownPct = null;
 
-                    for (int j = i + 1; j < workingSet.Count; j++)
+                    int scanLimit = maxLookahead > 0
+                        ? Math.Min(i + 1 + maxLookahead, workingSet.Count)
+                        : workingSet.Count;
+
+                    for (int j = i + 1; j < scanLimit; j++)
                     {
                         var future = workingSet[j];
 
